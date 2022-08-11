@@ -63,6 +63,7 @@ class Activation:
             if current_time >= timeout:
                 raise asyncio.TimeoutError("Timeout waiting for the code")
             status = await self.client.get_activation_status(self.activation_id)
+            logger.debug(status)
             if ExpectedActivationStatus.STATUS_WAIT_CODE in status:
                 await asyncio.sleep(check_delay)
                 current_time += check_delay

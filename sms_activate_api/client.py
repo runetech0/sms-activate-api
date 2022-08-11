@@ -1,9 +1,6 @@
-from distutils.log import debug
-from itertools import count
 import aiohttp
 import asyncio
 
-from pytest import param
 from . import errors
 from urllib import parse
 from .enums import Action, ErrorsText
@@ -52,6 +49,8 @@ class SmsActivateClient:
         text = await resp.text()
         if text == ErrorsText.NO_BALANCE:
             raise errors.NoBalance(text)
+        if text == ErrorsText.NO_NUMBERS:
+            raise errors.NoNumbers
 
     async def _request(self, params: dict, method: str = "GET", return_txt=False):
         if self._session is None:
