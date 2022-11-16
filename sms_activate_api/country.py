@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 class Country:
     def __init__(self, client: SmsActivateClient, data: dict) -> None:
         self.client = client
+        self.data = data
         self.id = data.get("id")
         self.code = self.id
         self.chinese_name = data.get("chn", None)
@@ -23,6 +24,9 @@ class Country:
 
     def __str__(self) -> str:
         return f"{self.id}: {self.english_name}"
+
+    def json(self):
+        return self.data
 
 
 class ServiceCountry:

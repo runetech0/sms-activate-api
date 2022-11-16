@@ -1,36 +1,44 @@
 import aiohttp
-import asyncio
 
 from . import errors
 from urllib import parse
 from .enums import Action, ErrorsText
 from .activation import Activation
 import json
-from .country import *
-from typing import *
-from pprint import pprint
+from .country import Country, ServiceCountry
+import typing
+# from pprint import pprint
 from .logger import logger
 import logging
+import random
 
 
 class SmsActivateClient:
-    def __init__(self, api_key, debug=False) -> None:
+
+    all_countries = []
+
+    def __init__(self, api_key,
+                 enable_whitelist=False,
+                 countries_whitelist: typing.List[int] = [],
+                 debug=False,
+                 proxy=None) -> None:
         if not debug:
             logger.setLevel(logging.ERROR)
         self.api_key = api_key
+        self._enable_whitelist = enable_whitelist
+        self._countries_whitelist = countries_whitelist
+        self._proxy = proxy
         self._base = "https://api.sms-activate.org"
         self.api_url = f"{self._base}/stubs/handler_api.php"
         self._session = None
         self.debug = debug
-        self.all_countries = []
-
-        asyncio.create_task(self.get_countries_list())
 
     def escape(self, value: str):
         return parse.quote(str(value).encode("UTF-8"))
 
     def _param_dict_parse(self, params: dict):
         parsed = f"api_key={self.api_key}&json=1"
+        # parsed = f"api_key={self.api_key}"
         if self.debug:
             parsed = f"{parsed}"
         for k, v in params.items():
@@ -43,7 +51,7 @@ class SmsActivateClient:
     async def close(self):
         if self._session is not None:
 
-            return self._session.close()
+            return await self._session.close()
 
     async def check_resp(self, resp):
         text = await resp.text()
@@ -56,21 +64,23 @@ class SmsActivateClient:
         if self._session is None:
             self._session = aiohttp.ClientSession()
         url = f"{self.api_url}?{self._param_dict_parse(params)}"
-        r = await self._session.request(method=method, url=url)
-        logger.debug(f"{method}:{url} returned {await r.text()} with status {r.status}")
+        async with self._session.request(method=method, url=url, proxy=self._proxy) as r:
+            await r.read()
+        logger.debug(f"{method}:{url} returned [{r.status}]{r.reason}")
         await self.check_resp(r)
         if r.status == 200:
             if return_txt:
                 return await r.text()
             return json.loads(await r.text())
 
-    async def get_countries_list(self) -> List[Country]:
-        params = {
-            "action": Action.GET_COUNTRIES_LIST
-        }
-        countries = await self._request(params, "GET")
-        self.all_countries = [Country(self, data)
-                              for data in countries.values()]
+    async def get_countries_list(self) -> typing.List[Country]:
+        if len(self.all_countries) == 0:
+            params = {
+                "action": Action.GET_COUNTRIES_LIST
+            }
+            countries = await self._request(params, "GET")
+            self.all_countries = [Country(self, data)
+                                  for data in countries.values()]
         return self.all_countries
 
     async def get_country_by_country_code(self, code: str) -> Country:
@@ -121,7 +131,7 @@ class SmsActivateClient:
         r = await self._request(params)
         return Activation(self, r)
 
-    async def buy_number_by_country(self, service: str, country_id: Union[str, int]) -> Activation:
+    async def buy_number_by_country(self, service: str, country_id: typing.Union[str, int]) -> Activation:
         params = {
             "action": Action.GET_NUMBER_V2,
             "service": service,
@@ -146,5 +156,31 @@ class SmsActivateClient:
         }
         return await self._request(params, return_txt=True)
 
-    async def close(self):
-        return await self._session.close()
+    async def get_country_codes_by_service(self, service: str):
+        params = {
+            "action": "getTopCountriesByService",
+            "service": service,
+        }
+        r = await self._request(params)
+        codes = []
+        for c in r:
+            if self._enable_whitelist:
+                cnt = c["country"]
+                if cnt not in self._countries_whitelist:
+                    continue
+
+            if c["count"] == 0:
+                continue
+            codes.append(c["country"])
+
+        return codes
+
+    async def buy_number_any_country(self, service: str, tries=20):
+        codes = await self.get_country_codes_by_service(service)
+        assert len(codes) > 0
+        for _ in range(tries):
+            try:
+                country_code = random.choice(codes)
+                return await self.buy_number_by_country(service, country_code)
+            except errors.NoNumbers:
+                continue
