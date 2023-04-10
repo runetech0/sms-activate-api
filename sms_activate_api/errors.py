@@ -1,5 +1,3 @@
-
-
 class SmsActivateError(Exception):
     """A General/base error"""
 
