@@ -19,6 +19,8 @@ class Country:
         self.visible = bool(data.get("visible"))
         self.russsian_name = bool(data.get("rus"))
 
+
+
     def __repr__(self) -> str:
         return f"{self.id}: {self.english_name}"
 

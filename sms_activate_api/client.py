@@ -104,7 +104,8 @@ class SmsActivateClient:
     async def top_countries_by_service(self, service: str, exclude_zero_counts: int = True) -> List[ServiceCountry]:
         params = {"action": Action.TOP_COUNTRIES_BY_SERVICE, "service": service, "freePrice": True}
         r = await self._request(params=params)
-        service_countries = [ServiceCountry(self, d) for d in r]
+        assert isinstance(r, dict), f"sms-activate response is not a dict. {r}"
+        service_countries = [ServiceCountry(self, d) for d in r.values()]
         if exclude_zero_counts:
             return [
                 country
@@ -154,10 +155,11 @@ class SmsActivateClient:
         }
         r = await self._request(params)
         codes: List[int] = []
-        for c in r:
+        assert isinstance(r, dict)
+        for c in r.values():
             if self._enable_whitelist:
                 cnt = c["country"]
-                if cnt not in self._countries_whitelist:
+                if int(cnt) not in self._countries_whitelist:
                     continue
 
             if c["count"] == 0:
