@@ -11,8 +11,8 @@ class Country:
         self.data = data
         self.id = data.get("id")
         self.code = self.id
-        self.chinese_name = data.get("chn", None)
-        self.english_name = data.get("eng")
+        self.chinese_name: str = data.get("chn", "")
+        self.english_name: str = data.get("eng", "")
         self.multi_service = bool(data.get("multiService", False))
         self.rent = bool(data.get("rent"))
         self.retry = bool(data.get("retry"))
@@ -25,7 +25,7 @@ class Country:
     def __str__(self) -> str:
         return f"{self.id}: {self.english_name}"
 
-    def json(self):
+    def json(self) -> dict[str, Any]:
         return self.data
 
 
