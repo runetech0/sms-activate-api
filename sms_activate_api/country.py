@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import *
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
     from .client import SmsActivateClient
 
 
 class Country:
-    def __init__(self, client: SmsActivateClient, data: dict) -> None:
+    def __init__(self, client: SmsActivateClient, data: Dict[str, Any]) -> None:
         self.client = client
         self.data = data
         self.id = data.get("id")
@@ -19,8 +19,6 @@ class Country:
         self.visible = bool(data.get("visible"))
         self.russsian_name = bool(data.get("rus"))
 
-
-
     def __repr__(self) -> str:
         return f"{self.id}: {self.english_name}"
 
@@ -32,15 +30,15 @@ class Country:
 
 
 class ServiceCountry:
-    def __init__(self, client: SmsActivateClient, data: dict) -> None:
+    def __init__(self, client: SmsActivateClient, data: Dict[str, Any]) -> None:
         self.client = client
-        self.country_id = data.get("country")
-        self.numbers_count = data.get("count")
-        self.price = data.get("price")
-        self.retail_price = data.get("retail_price")
+        self.country_id = str(data.get("country", ""))
+        self.numbers_count = int(data.get("count", 0))
+        self.price = int(data.get("price", 0))
+        self.retail_price = int(data.get("retail_price", 0))
 
     def __repr__(self) -> str:
-        return f"{self.country_id}: {self.price}/{self.retail_price}"
+        return self.__str__()
 
     def __str__(self) -> str:
         return f"{self.country_id}: {self.price}/{self.retail_price}"

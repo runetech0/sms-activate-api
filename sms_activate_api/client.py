@@ -71,6 +71,7 @@ class SmsActivateClient:
         url = f"{self.api_url}?{self._param_dict_parse(params)}"
         async with self._session.request(method=method, url=url, proxy=self._proxy) as r:
             await r.read()
+
         logger.debug(f"{method}:{url} returned [{r.status}]{r.reason}")
         await self.check_resp(r)
         if return_txt:
@@ -107,11 +108,7 @@ class SmsActivateClient:
         assert isinstance(r, dict), f"sms-activate response is not a dict. {r}"
         service_countries = [ServiceCountry(self, d) for d in r.values()]
         if exclude_zero_counts:
-            return [
-                country
-                for country in service_countries
-                if isinstance(country.numbers_count, int) and country.numbers_count > 0
-            ]
+            return [country for country in service_countries]
 
         return service_countries
 
