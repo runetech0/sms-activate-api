@@ -53,7 +53,7 @@ class SmsActivateClient:
         return parsed
 
     async def close(self) -> None:
-        if self._session is not None:
+        if self._session:
             return await self._session.close()
 
     async def check_resp(self, resp: aiohttp.ClientResponse) -> None:
@@ -66,7 +66,7 @@ class SmsActivateClient:
     async def _request(
         self, params: Dict[str, Any], method: str = "GET", return_txt: int = False
     ) -> str | Dict[str, Any]:
-        if self._session is None:
+        if not self._session:
             self._session = aiohttp.ClientSession()
         url = f"{self.api_url}?{self._param_dict_parse(params)}"
         async with self._session.request(method=method, url=url, proxy=self._proxy) as r:
