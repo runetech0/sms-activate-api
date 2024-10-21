@@ -36,7 +36,7 @@ github = "https://github.com/runetech0/sms-activate-api"
 
 
 [tool.bumpver]
-current_version = "0.1.0"
+current_version = "0.1.1"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
@@ -51,9 +51,9 @@ push = false
 [tool.bumpver.file_patterns]
 "pyproject.toml" = [
     'current_version = "{version}"',
-    'version = "version"'
+    ''
 ]
-"sms_activate_api/__init__.py" = [
+"async_sms_activate/__init__.py" = [
     "{version}",
 ]
 "README.md" = [
