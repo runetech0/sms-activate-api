@@ -1,11 +1,16 @@
 
 
 
-# sms-activate-api 
+# async-sms-activate
 
 An async API wrapper for sms-activate.org to buy the phone numbers and get the version code
 etc. Below is a complete list of features
 
+## Installation
+
+```
+pip install async-sms-activate
+```
 
 ## Features
 
