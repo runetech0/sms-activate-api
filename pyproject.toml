@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 
 
-name = "sms-activate-api"
+name = "async-sms-activate"
 version = "0.1.0"
 description = "Async API wrapper for sms-activate.org"
 
@@ -26,11 +26,11 @@ dependencies = [
 ]
 requires-python = ">=3.11"
 
-keywords = ["proxies" ,"proxy", "reader", "checker", "bulk"]
+keywords = ["sms-activate.org", "async"]
 
 [project.urls]
-Homepage = "https://github.com/runetech0/proxy-reader"
-github = "https://github.com/runetech0/proxy-reader"
+Homepage = "https://github.com/runetech0/sms-activate-api"
+github = "https://github.com/runetech0/sms-activate-api"
 
 
 
